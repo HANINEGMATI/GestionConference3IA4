@@ -1,0 +1,19 @@
+<!-- conference list -->
+<h2>Liste des conférences</h2>
+
+<table>
+  <thead><tr><th>Titre</th><th>Lieu</th><th>Action</th></tr></thead>
+  <tbody>
+    {% if conferences %}
+      {% for c in conferences %}
+        <tr>
+          <td>{{ c.name }}</td>
+          <td>{{ c.location }}</td>
+          <td><a href="{% url 'conference_details' c.pk %}">Détails</a></td>
+        </tr>
+      {% endfor %}
+    {% else %}
+      <tr><td colspan="3">Aucune conférence trouvée.</td></tr>
+    {% endif %}
+  </tbody>
+</table>
