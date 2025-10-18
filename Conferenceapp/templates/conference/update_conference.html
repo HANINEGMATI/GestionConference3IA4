@@ -1,0 +1,12 @@
+
+<h2>Modifier une conférence</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Enregistrer les modifications</button>
+</form>
+
+<a href="{% url 'conference_liste' %}">⬅ Retour à la liste</a>
+
+

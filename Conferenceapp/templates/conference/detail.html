@@ -1,0 +1,9 @@
+<h2>Détails de la conférence</h2>
+
+<p><strong>Titre :</strong> {{ conference.name }}</p>
+<p><strong>Lieu :</strong> {{ conference.location }}</p>
+<p><strong>Date de début :</strong> {{ conference.start_date }}</p>
+<p><strong>Date de fin :</strong> {{ conference.end_date }}</p>
+<p><strong>Description :</strong> {{ conference.description }}</p>
+
+<a href="{% url 'conference_liste' %}">⬅ Retour à la liste</a>

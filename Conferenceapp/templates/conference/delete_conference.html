@@ -1,0 +1,9 @@
+<h2>Supprimer une conférence</h2>
+
+<p>Voulez-vous vraiment supprimer la conférence : <strong>{{ conference.name }}</strong> ?</p>
+
+<form method="post">
+  {% csrf_token %}
+  <button type="submit">Oui, supprimer</button>
+  <a href="{% url 'conference_liste' %}">Annuler</a>
+</form>

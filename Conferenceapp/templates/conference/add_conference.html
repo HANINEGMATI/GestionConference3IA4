@@ -1,0 +1,10 @@
+<h2>Ajouter une conférence</h2>
+
+<form method="post">
+  {% csrf_token %}
+  {{ form.as_p }}
+  <button type="submit">Ajouter</button>
+</form>
+
+<a href="{% url 'conference_liste' %}">⬅ Retour à la liste</a>
+
