@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>📜 Liste des Soumissions</h2>
+
+<table border="1" cellpadding="8">
+    <tr>
+        <th>Titre</th>
+        <th>Statut</th>
+        <th>PDF</th>
+        <th>Détails</th>
+    </tr>
+
+    {% for submission in submissions %}
+    <tr>
+        <td>{{ submission.title }}</td>
+        <td>{{ submission.status }}</td>
+        <td>
+            {% if submission.file %}
+                <a href="{{ submission.file.url }}" download 
+                   style="background:#007bff; color:white; padding:6px 10px; border-radius:5px; text-decoration:none;">
+                    ⬇️ Télécharger
+                </a>
+            {% else %}
+                Aucun fichier
+            {% endif %}
+        </td>
+        <td>
+            <a href="{% url 'detail_submission' submission.pk %}" 
+               style="background:#28a745; color:white; padding:6px 10px; border-radius:5px; text-decoration:none;">
+               🔍 Voir détails
+            </a>
+            <a href="{% url 'update_submission' submission.submission_id %}">Modifier</a>
+
+        </td>
+    </tr>
+    {% endfor %}
+</table>
+
+
+<br>
+
+<a href="{% url 'conference_liste' %}" 
+   style="background:#6c757d; color:white; padding:6px 10px; border-radius:5px; text-decoration:none;">
+   ⬅️ Retour aux conférences
+   
+</a>
+{% endblock %}

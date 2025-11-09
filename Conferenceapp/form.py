@@ -19,7 +19,7 @@ class ConferenceForm(forms.ModelForm):
         widgets = {
             'name': forms.TextInput(attrs={'placeholder': 'Entrez le titre de la conférence'}),
             'location': forms.TextInput(attrs={'placeholder': 'Entrez le lieu'}),
-            'start_date': forms.DateInput(attrs={'type': 'date'}),
+            'start_date': forms.DateInput(attrs={'placeholder': 'date de debut','type': 'date'}),
             'end_date': forms.DateInput(attrs={'type': 'date'}),
             'description': forms.Textarea(attrs={'placeholder': 'Entrez la description', 'rows': 4}),
         }

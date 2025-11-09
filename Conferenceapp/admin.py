@@ -1,24 +1,26 @@
 from django.contrib import admin
 from .models import Conference, Submission, Organizing_commiteee
-
+from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from .models import Submission
 # === Personnalisation globale de l’interface admin ===
 admin.site.site_header = "Gestion des conférences"
 admin.site.site_title = "Administration des conférences"
 admin.site.index_title = "Bienvenue dans l'administration des conférences"
 
-# === Inline pour Submission (mode Stacked) ===
+# === Inline Submission (Stacked) ===
 class SubmissionStackedInline(admin.StackedInline):
     model = Submission
     readonly_fields = ('submission_id', 'submission_date')
-    extra = 0  # Ne pas afficher de formulaires vides
-    max_num = 10  # Limite le nombre d'inlines
-
+    extra = 0
+    max_num = 10
     fieldsets = (
         ('Informations de base', {
-            'fields': ('user_id', 'title', 'abstract', 'keyword')
+            'fields': ('user_id', 'title', 'abstract', 'keywords')
         }),
         ('Fichier et statut', {
-            'fields': ('paper', 'status', 'payed')
+            'fields': ('file', 'status', 'payed')
         }),
         ('Métadonnées', {
             'fields': ('submission_id', 'submission_date'),
@@ -26,7 +28,7 @@ class SubmissionStackedInline(admin.StackedInline):
         }),
     )
 
-# === Inline pour Submission (mode Tabular) ===
+# === Inline Submission (Tabular) ===
 class SubmissionTabularInline(admin.TabularInline):
     model = Submission
     fields = ('title', 'status', 'user_id', 'payed')
@@ -34,26 +36,14 @@ class SubmissionTabularInline(admin.TabularInline):
     extra = 0
     max_num = 5
 
-# === Configuration de l’admin pour Conference ===
+# === Configuration admin pour Conference ===
 @admin.register(Conference)
 class ConferenceAdmin(admin.ModelAdmin):
-    # a. Colonnes affichées
     list_display = ('name', 'theme', 'location', 'start_date', 'end_date', 'duration')
-    
-    # b. Méthode personnalisée pour la durée
-    def duration(self, obj):
-        if obj.start_date and obj.end_date:
-            return (obj.end_date - obj.start_date).days
-        return "-"
-    duration.short_description = "Durée (jours)"
-    
-    # d. Filtres
     list_filter = ('theme', 'location', 'start_date')
-    
-    # e. Recherche
     search_fields = ('name', 'description', 'location')
-    
-    # f. Organisation du formulaire par sections
+    ordering = ('start_date',)
+    date_hierarchy = 'start_date'
     fieldsets = (
         ('Informations générales', {
             'fields': ('name', 'theme', 'description')
@@ -62,41 +52,34 @@ class ConferenceAdmin(admin.ModelAdmin):
             'fields': ('location', 'start_date', 'end_date')
         }),
     )
-    
-    # g. Ordering
-    ordering = ('start_date',)
-    
-    # h. Date hierarchy
-    date_hierarchy = 'start_date'
-    
-    # i. Inline Submission
-    inlines = [SubmissionStackedInline]  # Remplacer par SubmissionTabularInline si souhaité
+    inlines = [SubmissionStackedInline]  # ou SubmissionTabularInline
 
-# === Configuration pour Submission ===
+    def duration(self, obj):
+        if obj.start_date and obj.end_date:
+            return (obj.end_date - obj.start_date).days
+        return "-"
+    duration.short_description = "Durée (jours)"
+
+# === Configuration admin pour Submission ===
 @admin.register(Submission)
 class SubmissionAdmin(admin.ModelAdmin):
     list_display = ('title', 'status', 'user_id', 'conference_id', 'submission_date', 'payed', 'short_abstract')
-
-    # Utiliser le champ relationnel exact présent dans le modèle (ici 'conference_id')
     list_filter = ('status', 'payed', ('conference_id', admin.RelatedOnlyFieldListFilter), 'submission_date')
-    search_fields = ('title', 'keyword', 'user_id__username')
-
+    search_fields = ('title', 'keywords', 'user_id__username')
     list_editable = ('status', 'payed')
     readonly_fields = ('submission_id', 'submission_date')
-    
     fieldsets = (
         ('Infos générales', {
-            'fields': ('submission_id', 'title', 'abstract', 'keyword')
+            'fields': ('submission_id', 'title', 'abstract', 'keywords')
         }),
         ('Fichier et conférence', {
-            'fields': ('paper', 'conference_id')
+            'fields': ('file', 'conference_id')
         }),
         ('Suivi', {
             'fields': ('status', 'payed', 'submission_date', 'user_id')
         }),
     )
-    
-    # Actions personnalisées (méthodes de la classe)
+
     actions = ['mark_as_paid', 'accept_submissions']
 
     def mark_as_paid(self, request, queryset):
@@ -105,7 +88,7 @@ class SubmissionAdmin(admin.ModelAdmin):
     mark_as_paid.short_description = "Marquer les soumissions sélectionnées comme payées"
 
     def accept_submissions(self, request, queryset):
-        updated = queryset.update(status='accepted')  # Assurez-vous que le champ status a cette valeur possible
+        updated = queryset.update(status='Accepted')
         self.message_user(request, f"{updated} soumission(s) acceptée(s).")
     accept_submissions.short_description = "Accepter les soumissions sélectionnées"
 
@@ -114,7 +97,7 @@ class SubmissionAdmin(admin.ModelAdmin):
         return (text[:50] + "...") if len(text) > 50 else text
     short_abstract.short_description = "Résumé court"
 
-# === Configuration pour Organizing Committee ===
+# === Configuration admin pour Organizing Committee ===
 @admin.register(Organizing_commiteee)
 class OrganizingCommitteeAdmin(admin.ModelAdmin):
     list_display = ('user_id', 'conference_id', 'role', 'date_joined')

@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% block content %}
+<h2>➕ Ajouter une Soumission</h2>
+
+<form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit" style="background:#28a745; color:white; padding:8px 12px; border:none; border-radius:5px;">
+        Ajouter
+    </button>
+</form>
+
+<a href="{% url 'list_submissions' %}" style="text-decoration:none; color:#007bff;">⬅️ Retour à la liste</a>
+{% endblock %}

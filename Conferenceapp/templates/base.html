@@ -1,0 +1,33 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Gestion Conference{% endblock %}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+</head>
+<body>
+    <nav>
+        <ul>
+            <li><a href="#">Home</a></li>
+            <li><a href="{% url 'conference_liste' %}">Conférences</a></li>
+            <li><a href="#">Contact</a></li>
+            {% if user.is_authenticated %}
+                <li><a>{{ user.username }}</a></li>
+                <li><a href="{% url 'logout' %}">Se déconnecter</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}">Se connecter</a></li>
+                <li><a href="{% url 'register' %}">S’inscrire</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+
+    <main>
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer>
+        <p>&copy; 2025-2026 Workshop Django</p>
+    </footer>
+</body>
+</html>

@@ -1,3 +1,5 @@
+{% extends "base.html" %}
+{% block content %}
 <h2>Liste des conférences</h2>
 
 <a href="{% url 'add_conference' %}">Ajouter une conférence</a>
@@ -20,8 +22,10 @@
           <td>{{ c.start_date }}</td>
           <td>
             <a href="{% url 'conference_details' c.pk %}">Détails</a> |
+            {%if user.is_authenticated and user.role == "commitee" %}
             <a href="{% url 'update_conference' c.pk %}">Modifier</a> |
             <a href="{% url 'delete_conference' c.pk %}">Supprimer</a>
+            {%endif %}
           </td>
         </tr>
       {% endfor %}
@@ -32,3 +36,4 @@
     {% endif %}
   </tbody>
 </table>
+{% endblock %}

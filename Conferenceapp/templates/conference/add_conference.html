@@ -1,8 +1,9 @@
+
 <h2>Ajouter une conférence</h2>
 
 <form method="post">
-  {% csrf_token %}
-  {{ form.as_p }}
+  {% csrf_token %}<!--   mnghyrha meytbaathch les info lezm securite -->
+  {{ form.as_p }} <!--afficher les inputs comme lignes-->
   <button type="submit">Ajouter</button>
 </form>
 

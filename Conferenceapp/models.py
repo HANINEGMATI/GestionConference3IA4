@@ -47,29 +47,38 @@ class Conference(models.Model):
     def clean(self):
         if self.end_date < self.start_date:
             raise ValidationError("La date de fin doit être postérieure à la date de début.")
-    
 class Submission(models.Model):
-    submission_id = models.CharField(max_length=100, primary_key=True , unique=True, editable=False)
-    user_id=models.ForeignKey("userapp.User",on_delete=models.CASCADE, related_name='submissions')
-    conference_id=models.ForeignKey(Conference, on_delete=models.CASCADE , related_name='submissions')
-    title= models.CharField(max_length=100)
-    abstract=models.TextField()
-    keyword=models.CharField(max_length=200, validators=[validate_keywords], 
-                            help_text="Mots-clés séparés par des virgules (maximum 10)")
-    paper=models.FileField(upload_to='papers/', 
-                          validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
-                          help_text="Seuls les fichiers PDF sont autorisés")
-    STATUT_choices=[
-        ("Submitted","Submitted"),
-        ("Under Review","Under Review"),
-        ("Accepted","Accepted"),
-        ("Rejected","Rejected")]
-    status=models.CharField(max_length=20, choices=STATUT_choices, default="Submitted")
-    submission_date=models.DateTimeField(auto_now_add=True)
+    submission_id = models.CharField(max_length=20, primary_key=True, editable=False)
+    title = models.CharField(max_length=200)
+    abstract = models.TextField()
+    keywords = models.CharField(
+        max_length=200,
+        validators=[validate_keywords],
+        help_text="Mots-clés séparés par des virgules (maximum 10)"
+    )
+    status = models.CharField(
+        max_length=50,
+        choices=[
+            ("Submitted", "Submitted"),
+            ("Under Review", "Under Review"),
+            ("Accepted", "Accepted"),
+            ("Rejected", "Rejected"),
+        ],
+        default="Submitted"
+    )
+    file = models.FileField(
+        upload_to='submissions_pdfs/',
+        validators=[FileExtensionValidator(allowed_extensions=['pdf'])],
+        null=True, blank=True
+    )
+    submission_date = models.DateTimeField(auto_now_add=True)
     payed = models.BooleanField(default=False)
-    created_at=models.DateTimeField(auto_now_add=True)
-    updated_at=models.DateTimeField(auto_now=True)
-    
+    conference_id = models.ForeignKey('Conference', on_delete=models.CASCADE, related_name='submissions')
+    user_id = models.ForeignKey('userapp.User', on_delete=models.CASCADE, related_name='submissions')
+
+    def __str__(self):
+        return f"{self.title} ({self.submission_id})"
+
     def save(self, *args, **kwargs):
         # Générer submission_id seulement lors de la création
         if getattr(self, "_state", None) is not None and getattr(self._state, "adding", False):
@@ -79,33 +88,19 @@ class Submission(models.Model):
                     new_id = generate_submission_id()
                 self.submission_id = new_id
         super().save(*args, **kwargs)
+def clean(self):
+    if not self.user_id:
+        return  # Ne rien valider si user_id non défini encore (sera défini dans form_valid)
     
-    def clean(self):
-        # Vérifier que la conférence est à venir par rapport à la date de soumission
-        if self.conference_id and self.submission_date:
-            submission_date_only = self.submission_date.date()  # Extraire seulement la date
-            if self.conference_id.start_date <= submission_date_only:
-                raise ValidationError("Les soumissions ne peuvent être faites que pour des conférences à venir.")
-        
-        # Limiter le nombre de soumissions par utilisateur par jour (max 3)
-        try:
-            if self.user_id_id:  # Vérifier directement l'ID
-                today = date.today()
-                submissions_today = Submission.objects.filter(
-                    user_id_id=self.user_id_id,
-                    created_at__date=today
-                ).exclude(pk=self.pk if self.pk else None).count()
-                
-                if submissions_today >= 3:
-                    raise ValidationError("Un utilisateur ne peut faire que 3 soumissions maximum par jour.")
-        except (AttributeError, ValueError):
-            # Ignorer la validation si l'utilisateur n'est pas encore défini
-            pass
-        
-        # example usage — adjust to your actual validation logic
-        if hasattr(self, 'submission_date') and self.submission_date and self.submission_date > date.today():
-            raise ValidationError("La date de soumission ne peut pas être dans le futur.")
-    
+    today = timezone.now().date()
+    submissions_today = Submission.objects.filter(
+        user_id=self.user_id,
+        submission_date__date=today
+    ).exclude(pk=self.pk if self.pk else None).count()
+
+    if submissions_today >= 1:
+        raise ValidationError("You can submit only once per day.")
+
 class Organizing_commiteee(models.Model):
     # committee_id = models.AutoField(primary_key=True)
     user_id=models.ForeignKey("userapp.User",on_delete=models.CASCADE, related_name='committees')

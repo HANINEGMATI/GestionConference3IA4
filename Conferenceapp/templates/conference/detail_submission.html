@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <title>Détails de la soumission</title>
+</head>
+<body>
+    <h1>{{ submission.title }}</h1>
+    <p><strong>Auteur :</strong> {{ submission.user.username }}</p>
+    <p><strong>Conférence :</strong> {{ submission.conference.title }}</p>
+    <p><strong>Résumé :</strong> {{ submission.abstract }}</p>
+    <p><strong>Mots-clés :</strong> {{ submission.keywords }}</p>
+    <p><strong>Statut :</strong> {{ submission.status }}</p>
+    <p><strong>Date de soumission :</strong> {{ submission.date_submitted }}</p>
+    <p><strong>Paiement :</strong> {% if submission.paid %}Payé{% else %}Non payé{% endif %}</p>
+
+    <tr>
+    <th>Fichier PDF</th>
+    <td>
+        {% if submission.paper %}
+            <a href="{{ submission.paper.url }}" download
+               style="display:inline-block; padding:8px 12px; background-color:#007bff; color:white; text-decoration:none; border-radius:5px;">
+               ⬇️ Télécharger l’article
+            </a>
+        {% else %}
+            Aucun fichier disponible
+        {% endif %}
+    </td>
+</tr>
+
+    <a href="{% url 'list_submissions' %}">⬅ Retour à la liste</a>
+</body>
+</html>
